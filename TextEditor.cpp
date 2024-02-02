@@ -108,6 +108,8 @@ std::string TextEditor::GetText(const Coordinates & aStart, const Coordinates & 
 			result += '\n';
 		}
 	}
+	if(!result.empty())
+		result.pop_back(); // Remove the extra newline at the end of `result`
 
 	return result;
 }
