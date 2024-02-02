@@ -9,6 +9,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h" // for imGui::GetCurrentWindow()
 
+#include <stdexcept>
+
 // TODO
 // - multiline comments vs single-line: latter is blocking start of a ML
 
@@ -914,6 +916,18 @@ void TextEditor::Render()
 			ImVec2 textScreenPos = ImVec2(lineStartScreenPos.x + mTextStart, lineStartScreenPos.y);
 
 			auto& line = mLines[lineNo];
+			std::string lineString;
+			lineString.reserve(line.size());
+			
+			// Copy the line into the line string
+			for(Glyph &g : line){
+				if(g.mChar == '\t')
+					for(int a=0; a<mTabSize; ++a)
+						lineString.push_back(' ');
+				else
+					lineString.push_back(g.mChar);
+			}
+			
 			longest = std::max(mTextStart + TextDistanceToLineStart(Coordinates(lineNo, GetLineMaxColumn(lineNo))), longest);
 			auto columnNo = 0;
 			Coordinates lineStartCoord(lineNo, 0);
@@ -966,6 +980,32 @@ void TextEditor::Render()
 					ImGui::Text("%s", errorIt->second.c_str());
 					ImGui::PopStyleColor();
 					ImGui::EndTooltip();
+				}
+			}
+			// Draw find results
+			auto findIt = mFindResults.find(lineNo + 1);
+			if (findIt != mFindResults.end())
+			{
+				std::vector<FindResult> &findResults = mFindResults[lineNo + 1];
+				
+				for(FindResult &findResult : findResults){
+					int findResultStartX = std::get<1>(findResult);
+					int findResultEndX = std::get<3>(findResult);
+					
+					findResultStartX = findResultStartX <= lineString.size() ? findResultStartX : lineString.size();
+					findResultEndX = findResultEndX <= lineString.size() ? findResultEndX : lineString.size();
+					findResultEndX = findResultEndX >= 0 ? findResultEndX : lineString.size();
+					
+					std::string beforeFindString = lineString.substr(0, findResultStartX);
+					std::string findString = lineString.substr(findResultStartX, findResultEndX);
+					
+					int findStartX = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, beforeFindString.c_str(), nullptr, nullptr).x;
+					int findEndX = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, findString.c_str(), nullptr, nullptr).x + findStartX;
+					
+					ImVec2 findStartScreenPos = ImVec2(textScreenPos.x + findStartX, textScreenPos.y);
+					ImVec2 findEndScreenPos = ImVec2(textScreenPos.x + findEndX, lineStartScreenPos.y + mCharAdvance.y);
+					
+					drawList->AddRectFilled(findStartScreenPos, findEndScreenPos, mPalette[(int)PaletteIndex::FindResult]);
 				}
 			}
 
@@ -2091,6 +2131,7 @@ const TextEditor::Palette & TextEditor::GetDarkPalette()
 			0x40000000, // Current line fill
 			0x40808080, // Current line fill (inactive)
 			0x40a0a0a0, // Current line edge
+			0x40ffff00, // Text find result
 		} };
 	return p;
 }
@@ -2119,6 +2160,7 @@ const TextEditor::Palette & TextEditor::GetLightPalette()
 			0x40000000, // Current line fill
 			0x40808080, // Current line fill (inactive)
 			0x40000000, // Current line edge
+			0x8000ffff, // Text find result
 		} };
 	return p;
 }
@@ -2147,6 +2189,7 @@ const TextEditor::Palette & TextEditor::GetRetroBluePalette()
 			0x40000000, // Current line fill
 			0x40808080, // Current line fill (inactive)
 			0x40000000, // Current line edge
+			0x40ffffff, // Text find result
 		} };
 	return p;
 }
@@ -3186,4 +3229,38 @@ const TextEditor::LanguageDefinition *TextEditor::LanguageDefinition::Lua()
 	langDef->mName = "Lua";
 
 	return langDef;
+}
+
+void TextEditor::AddFindResultSingleLine(const int line, FindResult aFindResult){
+	const int begin_line = std::get<0>(aFindResult);
+	const int end_line = std::get<2>(aFindResult);
+	
+	if(line != begin_line){
+		std::get<1>(aFindResult) = 0;
+	}
+	if(line != end_line){
+		std::get<3>(aFindResult) = -1;
+	}
+	
+	if(mFindResults.count(line) == 0){
+		mFindResults.insert({line, std::vector<FindResult>{aFindResult}});
+	} else{
+		mFindResults[line].push_back(aFindResult);
+	}
+}
+
+void TextEditor::AddFindResult(const FindResult &aFindResult){
+	const int begin_line = std::get<0>(aFindResult);
+	const int end_line = std::get<2>(aFindResult);
+	
+	if(begin_line > end_line){
+		throw std::runtime_error("AddFindResult() called with malformed FindResult: begin_line > end_line");		
+	}
+	
+	for(int a=begin_line; a<=end_line; ++a)
+		AddFindResultSingleLine(a, aFindResult);
+}
+
+void TextEditor::ClearFindResults(){
+	mFindResults.clear();
 }

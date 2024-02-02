@@ -36,6 +36,7 @@ public:
 		CurrentLineFill,
 		CurrentLineFillInactive,
 		CurrentLineEdge,
+		FindResult,
 		Max
 	};
 
@@ -130,6 +131,8 @@ public:
 	typedef std::unordered_set<std::string> Keywords;
 	typedef std::map<int, std::string> ErrorMarkers;
 	typedef std::unordered_set<int> Breakpoints;
+	typedef std::tuple<int, int, int, int> FindResult;
+	typedef std::map<int, std::vector<FindResult>> FindResults;
 	typedef std::array<ImU32, (unsigned)PaletteIndex::Max> Palette;
 	typedef uint8_t Char;
 
@@ -197,6 +200,8 @@ public:
 
 	void SetErrorMarkers(const ErrorMarkers& aMarkers) { mErrorMarkers = aMarkers; }
 	void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
+	void AddFindResult(const FindResult &aFindResult);
+	void ClearFindResults();
 
 	void Render(const char* aTitle, const ImVec2& aSize = ImVec2(), bool aBorder = false);
 	void SetText(const std::string& aText);
@@ -392,6 +397,7 @@ private:
 	bool mCheckComments;
 	Breakpoints mBreakpoints;
 	ErrorMarkers mErrorMarkers;
+	FindResults mFindResults;
 	ImVec2 mCharAdvance;
 	Coordinates mInteractiveStart, mInteractiveEnd;
 	std::string mLineBuffer;
@@ -403,4 +409,7 @@ private:
 	bool mMarkedUnsaved;
 	int mUndoIndexFirstEdit;
 	int mUndoIndexLastSave;
+	
+	// Private methods
+	void AddFindResultSingleLine(const int line, const FindResult aFindResult);
 };
