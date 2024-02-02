@@ -173,20 +173,20 @@ public:
 		{
 		}
 
-		static const LanguageDefinition& CPlusPlus();
-		static const LanguageDefinition& HLSL();
-		static const LanguageDefinition& GLSL();
-		static const LanguageDefinition& C();
-		static const LanguageDefinition& SQL();
-		static const LanguageDefinition& AngelScript();
-		static const LanguageDefinition& Lua();
+		static const LanguageDefinition *CPlusPlus();
+		static const LanguageDefinition *HLSL();
+		static const LanguageDefinition *GLSL();
+		static const LanguageDefinition *C();
+		static const LanguageDefinition *SQL();
+		static const LanguageDefinition *AngelScript();
+		static const LanguageDefinition *Lua();
 	};
 
 	TextEditor();
 	~TextEditor();
 
-	void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
-	const LanguageDefinition& GetLanguageDefinition() const { return mLanguageDefinition; }
+	void SetLanguageDefinition(const LanguageDefinition *aLanguageDef);
+	const LanguageDefinition *GetLanguageDefinition() const { return mLanguageDefinition; }
 
 	const Palette& GetPalette() const { return mPaletteBase; }
 	void SetPalette(const Palette& aValue);
@@ -382,7 +382,7 @@ private:
 
 	Palette mPaletteBase;
 	Palette mPalette;
-	LanguageDefinition mLanguageDefinition;
+	const LanguageDefinition *mLanguageDefinition;
 	RegexList mRegexList;
 
 	bool mCheckComments;
