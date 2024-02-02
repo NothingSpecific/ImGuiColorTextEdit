@@ -173,6 +173,10 @@ public:
 		{
 		}
 
+		/*
+			These language definitions instantiate a new LanguageDefinition object, then return a pointer to it.
+			The returned object must be freed with `delete`.
+		*/
 		static const LanguageDefinition *CPlusPlus();
 		static const LanguageDefinition *HLSL();
 		static const LanguageDefinition *GLSL();
