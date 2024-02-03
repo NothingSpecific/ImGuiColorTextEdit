@@ -209,6 +209,8 @@ public:
 
 	void SetTextLines(const std::vector<std::string>& aLines);
 	std::vector<std::string> GetTextLines() const;
+	std::string GetTextLine(Line aLine) const;
+	std::string GetTextLine(int aLine) const;
 
 	std::string GetSelectedText() const;
 	std::string GetCurrentLineText()const;

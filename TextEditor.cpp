@@ -909,6 +909,7 @@ void TextEditor::Render()
 	if (!mLines.empty())
 	{
 		float spaceSize = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ", nullptr, nullptr).x;
+		std::string lineString;
 
 		while (lineNo <= lineMax)
 		{
@@ -916,7 +917,7 @@ void TextEditor::Render()
 			ImVec2 textScreenPos = ImVec2(lineStartScreenPos.x + mTextStart, lineStartScreenPos.y);
 
 			auto& line = mLines[lineNo];
-			std::string lineString;
+			lineString.clear();
 			lineString.reserve(line.size());
 			
 			// Copy the line into the line string
@@ -2203,22 +2204,26 @@ std::string TextEditor::GetText() const
 std::vector<std::string> TextEditor::GetTextLines() const
 {
 	std::vector<std::string> result;
-
 	result.reserve(mLines.size());
 
 	for (auto & line : mLines)
-	{
-		std::string text;
-
-		text.resize(line.size());
-
-		for (size_t i = 0; i < line.size(); ++i)
-			text[i] = line[i].mChar;
-
-		result.emplace_back(std::move(text));
-	}
+		result.emplace_back(std::move(GetTextLine(line)));
 
 	return result;
+}
+std::string TextEditor::GetTextLine(Line aLine) const
+{
+	std::string text;
+	text.resize(aLine.size());
+
+	for (size_t i = 0; i < aLine.size(); ++i)
+		text[i] = aLine[i].mChar;
+	return text;
+}
+std::string TextEditor::GetTextLine(int aLine) const
+{
+	Line line = mLines[aLine];
+	return GetTextLine(line);
 }
 
 std::string TextEditor::GetSelectedText() const
