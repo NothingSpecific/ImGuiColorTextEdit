@@ -3269,3 +3269,7 @@ void TextEditor::AddFindResult(const FindResult &aFindResult){
 void TextEditor::ClearFindResults(){
 	mFindResults.clear();
 }
+void TextEditor::ClearFindResults(int line){
+	if(mFindResults.count(line) != 0)
+		mFindResults.erase(line);
+}

@@ -202,6 +202,7 @@ public:
 	void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
 	void AddFindResult(const FindResult &aFindResult);
 	void ClearFindResults();
+	void ClearFindResults(int line);
 
 	void Render(const char* aTitle, const ImVec2& aSize = ImVec2(), bool aBorder = false);
 	void SetText(const std::string& aText);
