@@ -991,14 +991,14 @@ void TextEditor::Render()
 				
 				for(FindResult &findResult : findResults){
 					int findResultStartX = std::get<1>(findResult);
-					int findResultEndX = std::get<3>(findResult);
+					int findResultLength = std::get<3>(findResult);
 					
 					findResultStartX = findResultStartX <= lineString.size() ? findResultStartX : lineString.size();
-					findResultEndX = findResultEndX <= lineString.size() ? findResultEndX : lineString.size();
-					findResultEndX = findResultEndX >= 0 ? findResultEndX : lineString.size();
+					findResultLength = findResultLength <= lineString.size() ? findResultLength : lineString.size();
+					findResultLength = findResultLength >= 0 ? findResultLength : lineString.size();
 					
 					std::string beforeFindString = lineString.substr(0, findResultStartX);
-					std::string findString = lineString.substr(findResultStartX, findResultEndX);
+					std::string findString = lineString.substr(findResultStartX, findResultLength);
 					
 					int findStartX = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, beforeFindString.c_str(), nullptr, nullptr).x;
 					int findEndX = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, findString.c_str(), nullptr, nullptr).x + findStartX;
