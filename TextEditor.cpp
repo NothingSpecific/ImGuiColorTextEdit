@@ -994,7 +994,7 @@ void TextEditor::Render()
 					int findResultLength = std::get<3>(findResult);
 					
 					findResultStartX = findResultStartX <= lineString.size() ? findResultStartX : lineString.size();
-					findResultLength = findResultLength <= lineString.size() ? findResultLength : lineString.size();
+					findResultLength = findResultStartX + findResultLength <= lineString.size() ? findResultLength : lineString.size();
 					findResultLength = findResultLength >= 0 ? findResultLength : lineString.size();
 					
 					std::string beforeFindString = lineString.substr(0, findResultStartX);
