@@ -203,6 +203,9 @@ public:
 	void AddFindResult(const FindResult &aFindResult);
 	void ClearFindResults();
 	void ClearFindResults(int line);
+	
+	void GotoNextFindResult(const bool wrap);
+	void GotoPrevFindResult(const bool wrap);
 
 	void Render(const char* aTitle, const ImVec2& aSize = ImVec2(), bool aBorder = false);
 	void SetText(const std::string& aText);

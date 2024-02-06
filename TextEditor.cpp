@@ -984,10 +984,10 @@ void TextEditor::Render()
 				}
 			}
 			// Draw find results
-			auto findIt = mFindResults.find(lineNo + 1);
+			auto findIt = mFindResults.find(lineNo);
 			if (findIt != mFindResults.end())
 			{
-				std::vector<FindResult> &findResults = mFindResults[lineNo + 1];
+				std::vector<FindResult> &findResults = mFindResults[lineNo];
 				
 				for(FindResult &findResult : findResults){
 					int findResultStartX = std::get<1>(findResult);
@@ -3272,4 +3272,81 @@ void TextEditor::ClearFindResults(){
 void TextEditor::ClearFindResults(const int line){
 	if(mFindResults.count(line) != 0)
 		mFindResults.erase(line);
+}
+
+void TextEditor::GotoNextFindResult(const bool wrap){
+	const Coordinates oldCursorPos = mState.mCursorPosition;
+	const int totalLines = GetTotalLines();
+	
+	// Look for find results on the same line
+	if(mFindResults.count(oldCursorPos.mLine) != 0){
+		for(FindResult &r : mFindResults[oldCursorPos.mLine]){
+			if(std::get<1>(r) > oldCursorPos.mColumn){
+				SetCursorPosition(Coordinates(oldCursorPos.mLine, std::get<1>(r)));
+				return;
+			}
+		}
+	}
+	// Look for find results on subsequent lines
+	for(int line=oldCursorPos.mLine+1; line<totalLines; ++line){
+		if(mFindResults.count(line) != 0){
+			if(!mFindResults[line].empty()){
+				FindResult &r = mFindResults[line][0];
+				SetCursorPosition(Coordinates(line, std::get<1>(r)));
+				return;
+			}
+		}
+	}
+	// Wrap around to the beginning of the file
+	if(wrap){
+		for(int line=0; line<oldCursorPos.mLine; ++line){
+			if(mFindResults.count(line) != 0){
+				if(!mFindResults[line].empty()){
+					FindResult &r = mFindResults[line][0];
+					SetCursorPosition(Coordinates(line, std::get<1>(r)));
+					return;
+				}
+			}
+		}
+	}
+}
+void TextEditor::GotoPrevFindResult(const bool wrap){
+	const Coordinates oldCursorPos = mState.mCursorPosition;
+	const int totalLines = GetTotalLines();
+	
+	// Look for find results on the same line
+	if(mFindResults.count(oldCursorPos.mLine) != 0){
+		if(!mFindResults[oldCursorPos.mLine].empty()){
+			const int s = mFindResults[oldCursorPos.mLine].size();
+			for(int a=s-1; a>=0; --a){
+				FindResult &r = mFindResults[oldCursorPos.mLine][a];
+				if(std::get<1>(r) < oldCursorPos.mColumn){
+					SetCursorPosition(Coordinates(oldCursorPos.mLine, std::get<1>(r)));
+					return;
+				}
+			}
+		}
+	}
+	// Look for find results on subsequent lines
+	for(int line=oldCursorPos.mLine-1; line>=0; --line){
+		if(mFindResults.count(line) != 0){
+			if(!mFindResults[line].empty()){
+				FindResult &r = mFindResults[line][mFindResults[line].size()-1];
+				SetCursorPosition(Coordinates(line, std::get<1>(r)));
+				return;
+			}
+		}
+	}
+	// Wrap around to the end of the file
+	if(wrap){
+		for(int line=totalLines; line>oldCursorPos.mLine; --line){
+			if(mFindResults.count(line) != 0){
+				if(!mFindResults[line].empty()){
+					FindResult &r = mFindResults[line][mFindResults[line].size()-1];
+					SetCursorPosition(Coordinates(line, std::get<1>(r)));
+					return;
+				}
+			}
+		}
+	}
 }
